@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Mail">
+
+<!-- 검색 -->
+	<sql id="criteria">
+		<if test="keyword!=null and type!=null">
+			<trim prefix="(" suffix=") AND" prefixOverrides="OR">
+					<choose>
+						<when test="type=='C'.toString()">
+							OR (MAILCONTENT LIKE '%' || #{keyword} || '%')
+						</when>
+						<when test="type=='W'.toString()">
+							OR ((USERID LIKE '%' || #{keyword} || '%') OR (TARGETID LIKE '%' || #{keyword} || '%'))
+						</when>
+					</choose>
+			</trim>
+		</if>
+	</sql>
+
+	<sql id="list">
+		<choose>
+				<when test="mailtype=='inbox'">
+					TARGETID = #{userid} AND SENDER_DELETE = '0'
+				</when>
+				<when test="mailtype=='received'">
+					USERID = #{userid} AND SENDER_DELETE = '0' AND DRAFT='0'
+				</when>
+				<when test="mailtype=='important'">
+					(USERID = #{userid} OR TARGETID=#{userid}) AND IMPORTANT = '1' AND SENDER_DELETE = '0'
+				</when>
+				<when test="mailtype=='draft'">
+					USERID = #{userid} AND DRAFT = '1' AND SENDER_DELETE = '0'
+				</when>
+				<when test="mailtype=='trash'">
+					(USERID = #{userid} OR TARGETID=#{userid}) AND SENDER_DELETE = '1'
+				</when>
+				<when test="mailtype=='inboxRead'">
+					TARGETID = #{userid} AND SENDER_DELETE = '0' AND READSTATE = '1' 
+				</when>
+				<when test="mailtype=='inboxUnread'">
+					TARGETID = #{userid} AND SENDER_DELETE = '0' AND READSTATE = '0' 
+				</when>
+				<when test="mailtype=='impRead'">
+					(USERID = #{userid} OR TARGETID=#{userid}) AND READSTATE = '1' AND IMPORTANT = '1' AND SENDER_DELETE = '0'
+				</when>
+				<when test="mailtype=='impUnread'">
+					(USERID = #{userid} OR TARGETID=#{userid}) AND READSTATE = '0' AND IMPORTANT = '1' AND SENDER_DELETE = '0'
+				</when>
+				<when test="mailtype=='trashRead'">
+					(USERID = #{userid} OR TARGETID=#{userid}) AND READSTATE = '1' AND SENDER_DELETE = '1'
+				</when>
+				<when test="mailtype=='trashUnread'">
+					(USERID = #{userid} OR TARGETID=#{userid}) AND READSTATE = '0' AND SENDER_DELETE = '1'
+				</when>
+		</choose>
+	</sql>
+	
+	<select id="totalCnt" parameterType="hashmap" resultType="_int">
+		SELECT COUNT(*) FROM TBL_MAIL WHERE 
+		<include refid="list"/>
+	</select>
+	
+	<select id="criTotalCnt" parameterType="hashmap" resultType="_int">
+		SELECT COUNT(*) FROM TBL_MAIL WHERE 
+		<include refid="criteria"/>
+		<include refid="list"/>
+	</select>
+
+	<select id="mailListAll" parameterType="hashmap" resultType="mailbean">
+		SELECT * FROM
+		(SELECT ROWNUM r, d.*
+			FROM (SELECT * FROM TBL_MAIL WHERE 
+				<include refid="list"/>
+			ORDER BY MAILNUM DESC) d) b
+		WHERE b.r
+		BETWEEN ${startRow} AND ${endRow}
+	</select>
+
+	<select id="mailListCri" parameterType="hashmap" resultType="mailbean">
+		SELECT * FROM
+		(SELECT ROWNUM r, d.*
+			FROM (SELECT * FROM TBL_MAIL WHERE 
+				<include refid="criteria"/>
+				<include refid="list"/>
+			ORDER BY MAILNUM DESC) d) b
+		WHERE b.r 
+		BETWEEN ${startRow} AND ${endRow}
+	</select>
+
+	<!-- 쪽지 상세보기 -->
+	<select id="getMailDetail" parameterType="int" resultType="mailbean">
+		SELECT * FROM TBL_MAIL WHERE MAILNUM = #{mailnum}
+	</select>
+	
+	<select id="toPrev" parameterType="int" resultType="_int">
+		SELECT d FROM(
+		    SELECT MAILNUM,
+		            LAG(MAILNUM) OVER (ORDER BY MAILNUM DESC) d
+		    FROM TBL_MAIL WHERE
+		    <include refid="list"/>
+	    ) WHERE MAILNUM = #{mailnum}
+	</select>
+	
+	<select id="toNext" parameterType="int" resultType="_int">
+		SELECT d FROM(
+		    SELECT MAILNUM,
+		            LEAD(MAILNUM) OVER (ORDER BY MAILNUM DESC) d
+		    FROM TBL_MAIL WHERE
+		    <include refid="list"/>
+	    ) WHERE MAILNUM = #{mailnum}
+	</select>
+	
+	<insert id="sendMail" parameterType="mailbean">
+		<!-- userid가 보내는 쪽지니까 received = 0 -->
+		INSERT INTO TBL_MAIL (MAILNUM, USERID, TARGETID, MAILCONTENT, READSTATE, IMPORTANT, 
+		DRAFT, SENDER_DELETE, RECEIVER_DELETE)
+		VALUES(MAIL_SEQ.NEXTVAL, #{userid}, #{targetid}, #{mailcontent}, '0', '0', '0', '0', '0')
+	</insert>
+	
+	<insert id="saveMail" parameterType="mailbean">
+		<!-- userid가 보내는 쪽지니까 received = 0 -->
+		INSERT INTO TBL_MAIL (MAILNUM, USERID, TARGETID, MAILCONTENT, READSTATE, IMPORTANT, 
+		DRAFT, SENDER_DELETE, RECEIVER_DELETE)
+		VALUES(MAIL_SEQ.NEXTVAL, #{userid}, #{targetid}, #{mailcontent}, '0', '0', '1', '0', '0')
+	</insert>
+	
+	<update id="updateMail" parameterType="hashmap">
+		UPDATE TBL_MAIL SET TARGETID= #{targetid}, MAILCONTENT = #{mailcontent} WHERE MAILNUM = #{mailnum}
+	</update>
+	
+	<update id="changeImp" parameterType="int">
+		UPDATE TBL_MAIL SET IMPORTANT = '1' WHERE MAILNUM = #{mailnum}
+	</update>
+	
+	<update id="notimportant" parameterType="int">
+		UPDATE TBL_MAIL SET IMPORTANT = '0' WHERE MAILNUM = #{mailnum}
+	</update>
+	
+	<update id="deleteSenderMail" parameterType="int">
+		UPDATE TBL_MAIL SET SENDER_DELETE = '1', IMPORTANT = '0' WHERE MAILNUM = #{mailnum}
+	</update>
+	
+	<update id="restoreMail" parameterType="int">
+		UPDATE TBL_MAIL SET SENDER_DELETE = '0' WHERE MAILNUM = #{mailnum}
+	</update>
+	
+	<update id="read" parameterType="int">
+		UPDATE TBL_MAIL SET READSTATE = '1' WHERE MAILNUM = #{mailnum}
+	</update>
+	
+	<delete id="deleteMail" parameterType="int">
+		DELETE FROM TBL_MAIL WHERE MAILNUM = #{mailnum}
+	</delete>
+
+</mapper>

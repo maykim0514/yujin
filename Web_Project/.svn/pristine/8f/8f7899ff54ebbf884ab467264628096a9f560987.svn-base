@@ -1,0 +1,93 @@
+package com.ezmarket.board.dao;
+
+import java.util.HashMap;
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+
+import com.ezmarket.mybatis.config.SqlMapConfig;
+import com.ezmarket.board.dao.BoardBean;
+
+public class BoardDAO {
+	SqlSessionFactory sqlfactory = SqlMapConfig.getInstance();
+	SqlSession sqlsession;
+	
+	public BoardDAO() {
+		sqlsession = sqlfactory.openSession(true);
+	}
+	
+	public int getBoardSeq() {
+		return (Integer)sqlsession.selectOne("Board.boardSeq");
+	}
+	
+	public int getBoardCnt() {
+		return sqlsession.selectOne("Board.boardCnt");
+	}
+	
+	public List<BoardBean> getBoardList(int startRow, int endRow) {
+		HashMap<String, Integer> datas = new HashMap<>();
+		datas.put("startRow", startRow);
+		datas.put("endRow", endRow);
+		List<BoardBean> boardList =sqlsession.selectList("Board.listAll", datas);
+		
+		return boardList;
+	}
+	
+//	public List<BoardBean> getBoardList() {
+//		List<BoardBean> boardList =sqlsession.selectList("Board.listAll");
+//		return boardList;
+//	}
+
+	public boolean insertSaleBoard(BoardBean board) {
+		return sqlsession.insert("Board.insertSaleBoard", board) == 1;
+	}
+	
+	public boolean insertRentBoard(BoardBean board) {
+		return sqlsession.insert("Board.insertRentBoard", board) == 1;
+	}
+	
+	public BoardBean getDetail(int boardnum) {
+		return sqlsession.selectOne("Board.getDetail",boardnum);
+	}
+
+	
+
+	public boolean modifyBoard(BoardBean board) {
+		return 1==sqlsession.update("Board.modifyBoard",board);
+	}
+	
+	
+//회윤님---------------------------------------------------------------------------------------
+	
+	public List<Object> productList() {
+		return sqlsession.selectList("Board.productList");
+	}
+	public List<Object> rentList() {
+		return sqlsession.selectList("Board.rentList");
+	}
+	public List<BoardBean> location_productList(String location) {
+		return sqlsession.selectList("Board.location_productList",location);
+	}
+	public List<BoardBean> location_rentList(String location) {
+		return sqlsession.selectList("Board.location_productList",location);
+	}
+	//boardNum, realname 가지고 오기 (사진이 있는 boardnum만 가져오기)
+	/*public List<FileBean> getFile() {
+		return sqlsession.selectList("Board.getFile");
+	}*/
+	public List<Object> topic_product(String topic) {
+		return sqlsession.selectList("Board.topic_product",topic);
+	}
+	public List<Object> topic_rent(String topic) {
+		return sqlsession.selectList("Board.topic_rent",topic);
+	}
+
+	public List<Object> category_sale(String category) {
+		return sqlsession.selectList("Board.category_sale", category);
+	}
+	
+	public List<Object> category_rent(String category) {
+		return sqlsession.selectList("Board.category_rent", category);
+	}
+}

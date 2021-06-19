@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Member">
+	<!-- 
+	private String userid;
+	private String userpw;
+	private String username;
+	private String userphone;
+	private String useremail;
+	private String userpostcode;
+	private String useraddr;
+	private String usercategory;
+	 -->
+	<insert id="join" parameterType="memberbean">
+		INSERT INTO TBL_USER(USERID,USERPW,USERNAME,USERPHONE,USEREMAIL,USERPOSTCODE,USERADDR,USERCATEGORY)
+		VALUES(#{userid},#{userpw},#{username},#{userphone},#{useremail},
+		#{userpostcode},#{useraddr},#{usercategory})
+	</insert>
+	
+	<select id="checkId" parameterType="string" resultType="_int">
+		SELECT COUNT(*) FROM TBL_USER WHERE USERID=#{userid}
+	</select>
+	
+	<select id="login" parameterType="hashmap" resultType="memberbean">
+		SELECT * FROM TBL_USER WHERE USERID=#{userid} AND USERPW=#{userpw}
+	</select>
+	
+	<select id="find_id_phone" parameterType="hashmap" resultType="memberbean">
+		SELECT * FROM TBL_USER WHERE USERNAME=#{username} AND USERPHONE=#{userphone}
+	</select>
+	
+	<select id="find_id_email" parameterType="hashmap" resultType="memberbean">
+		SELECT * FROM TBL_USER WHERE USERNAME=#{username} AND USEREMAIL=#{useremail}
+	</select>
+	
+	<update id="change_pw" parameterType="hashmap">
+		UPDATE TBL_USER
+			SET USERPW=#{newPw}
+			WHERE USERID=#{userid}
+	</update>
+<!-- 마이페이지 -->
+	<!-- 판매 게시물 -->
+	<select id="usedSell" resultType="boardbean">
+		SELECT * FROM TBL_BOARD WHERE USERID=#{userid} AND PRODUCTSTATUS = '0'
+	</select>
+	<!-- 대여 게시물 -->
+	<select id="usedRent" resultType="boardbean">
+		SELECT * FROM TBL_BOARD WHERE USERID=#{userid} AND PRODUCTSTATUS = '1'
+	</select>
+	<!-- 찜한 게시물 -->
+	<!-- 서브 쿼리 결과가 여러개라 에러 -->
+	<select id="usedPick" resultType="boardbean">
+		SELECT * FROM TBL_BOARD WHERE BOARDNUM in (SELECT BOARDNUM FROM TBL_userpick WHERE USERID=#{userid})
+	</select>
+	
+	<update id="userUpdate">
+		UPDATE TBL_USER
+		SET USERPW=#{userpw}, USERPHONE=#{userphone}, USEREMAIL=#{useremail}, USERPOSTCODE=#{userpostcode}, USERADDR=#{useraddr}
+		WHERE USERID=#{userid}
+	</update>
+	
+</mapper>

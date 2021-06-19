@@ -1,0 +1,31 @@
+package com.ezmarket.report.dao;
+
+import java.util.HashMap;
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+
+import com.ezmarket.mybatis.config.SqlMapConfig;
+
+public class ReportDAO {
+	SqlSessionFactory sqlfactory = SqlMapConfig.getInstance();
+	SqlSession sqlsession;
+	
+	public ReportDAO(){
+		sqlsession=sqlfactory.openSession(true);
+	}
+
+	public boolean insertReport(int boardnum, String userid, String reason) {
+		HashMap<String, Object> datas = new HashMap<>();
+		datas.put("boardnum", boardnum);
+		datas.put("userid", userid);
+		datas.put("reason", reason);
+		return sqlsession.insert("Report.insertReport", datas) == 1;
+	}
+
+	public List<Object> getList() {
+		return sqlsession.selectList("Report.getList");
+	}
+	
+}

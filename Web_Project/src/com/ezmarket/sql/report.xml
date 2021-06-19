@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Report">
+	<insert id="join" parameterType="memberbean">
+		INSERT INTO TBL_MEMBER(REPORTCODE,USERID,REPORT,REPORTDETAIL,REPORTDATE,REPORTSTATE)
+		VALUES(#{reportcode},#{userid},#{report},#{reportdetail},#{reportdate},
+		#{reportstate})
+	</insert>
+
+	<insert id="insertReport" parameterType="hashmap">
+		INSERT INTO TBL_REPORT (REPORTCODE, USERID, BOARDNUM, REPORT, REPORTSTATE)
+		VALUES(REPORT_SEQ.NEXTVAL, #{userid}, #{boardnum}, #{reason}, '0')
+	</insert>
+	
+	<select id="getList" resultType="reportbean">
+		SELECT * FROM TBL_REPORT ORDER BY BOARDNUM DESC
+	</select>
+
+</mapper>

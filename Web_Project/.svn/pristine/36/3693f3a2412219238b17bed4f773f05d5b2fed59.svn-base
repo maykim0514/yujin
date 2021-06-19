@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Board">
+
+	<insert id="insertSaleBoard" parameterType="boardbean">
+		INSERT INTO TBL_BOARD(USERID, BOARDNUM, BOARDTITLE, PRODUCTPRICE, BOARDCATEGORY, LOCATION, PRODUCTEXPLAIN, PRODUCTSTATUS, PRODUCTOFFER, FILENAME, BOARDSTATUS, BOARDREADCNT) 
+		VALUES(#{userid}, BOARD_SEQ.NEXTVAL, #{boardTitle}, #{productPrice}, #{boardCategory}, #{location}, #{productExplain}, #{productStatus}, #{productOffer}, #{filename}, '0', 0)
+	</insert>
+	
+	<insert id="insertRentBoard" parameterType="boardbean">
+		INSERT INTO TBL_BOARD(USERID, BOARDNUM, BOARDTITLE, PRODUCTPRICE, BOARDCATEGORY, LOCATION, PRODUCTEXPLAIN, PRODUCTSTATUS, PRODUCTOFFER, FILENAME, AVTIME1, AVTIME2, BOARDSTATUS) 
+		VALUES(#{userid}, BOARD_SEQ.NEXTVAL, #{boardTitle}, #{productPrice}, #{boardCategory}, #{location}, #{productExplain}, #{productStatus}, #{productOffer}, #{filename},
+		#{avTime1, jdbcType=VARCHAR}, #{avTime2, jdbcType=VARCHAR}, '1')
+	</insert>
+	
+	<select id="boardSeq" resultType="_int">
+		SELECT BOARD_SEQ.CURRVAL FROM DUAL
+	</select>
+	<select id="boardCnt" resultType="_int">
+		SELECT COUNT(*) FROM TBL_BOARD	
+	</select>
+	<select id="listAll" parameterType="hashmap" resultType="boardbean">
+		SELECT * FROM
+			(SELECT ROWNUM r, d.*
+			FROM (SELECT * FROM TBL_BOARD ORDER BY BOARDNUM DESC) d) b
+		WHERE b.r BETWEEN ${startRow} AND ${endRow}
+	</select>
+
+	<select id="getDetail" parameterType="_int" resultType="boardbean">
+		SELECT * FROM TBL_BOARD WHERE BOARDNUM = ${boardnum}
+	</select>
+
+	<select id="modifyBoard" parameterType="boardbean">
+		UPDATE TBL_BOARD SET 
+		BOARDTITLE = #{boardtitle}, BOARDEXPLAIN = #{boardexplain}, PRODUCTPRICE=#{productprice},
+		PRODUCTOFFER=#{productoffer}
+		WHERE BOARDNUM=${boardnum}
+	</select>
+
+	<update id="modifyOkBoard" parameterType="boardbean">
+		UPDATE TBL_BOARD SET 
+		BOARDTITLE = #{boardtitle}, BOARDEXPLAIN = #{boardexplain}, PRODUCTPRICE=#{productprice},
+		PRODUCTOFFER=#{productoffer}
+		WHERE BOARDNUM=${boardnum}
+	</update>
+	
+	<update id="updateReadCount" parameterType="_int">
+		UPDATE TBL_BOARD SET BOARDREADCNT = BOARDREADCNT+1
+		WHERE BOARDNUM=${boardnum}
+	</update>
+
+	
+	
+
+<!-- 회윤 -->	
+	<select id="productList" resultType="boardbean">
+		SELECT * FROM TBL_BOARD WHERE BOARDSTATUS='0'
+	</select>
+	
+	<select id="rentList" resultType="boardbean">
+		SELECT * FROM TBL_BOARD WHERE BOARDSTATUS='1'
+	</select>
+	
+	<!-- 
+	MyBatis에서 like(와일드카드)를 쓸 때는 RDBMS의 종류에 따라 사용법이 다르다.
+	Oracle에서는 이런식으로 쓰이기 때문에 
+	title like '%' ||  #{keyword} || '%'
+	#{keyword} 안에다가 ${location}을 사용해주었다.
+	 -->
+	 
+	<select id="location_productList" resultType="boardbean">
+		SELECT * FROM TBL_BOARD WHERE PRODUCTSTATUS='0' AND LOCATION LIKE '%' ||  #{location} || '%'
+	</select>
+	
+	<select id="location_rentList" resultType="boardbean">
+		SELECT * FROM TBL_BOARD WHERE PRODUCTSTATUS='1' AND LOCATION LIKE '%' ||  #{location} || '%'
+	</select>
+	
+	<!-- <select id="getFile" resultType="filebean">
+		SELECT * FROM TBL_FILE
+	</select> -->
+	<select id="topic_product" resultType="boardbean">
+		SELECT * FROM TBL_BOARD WHERE BOARDTITLE LIKE '%' ||  #{topic} || '%'  AND BOARDSTATUS='0'
+	</select>
+	
+	<select id="topic_rent" resultType="boardbean">
+		SELECT * FROM TBL_BOARD WHERE BOARDTITLE LIKE '%' ||  #{topic} || '%' AND BOARDSTATUS='1'
+	</select>
+	
+	<select id="category_sale" resultType="boardbean">
+		SELECT * FROM TBL_BOARD WHERE BOARDCATEGORY LIKE '%' ||  #{category} || '%'  AND BOARDSTATUS='0'
+	</select>
+	
+	<select id="category_rent" resultType="boardbean">
+		SELECT * FROM TBL_BOARD WHERE BOARDCATEGORY LIKE '%' ||  #{category} || '%' AND BOARDSTATUS='1'
+	</select>
+</mapper>

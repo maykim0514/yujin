@@ -1,0 +1,119 @@
+package com.ezmarket.board.dao;
+
+public class BoardBean {
+	
+	private String userid;
+	private int boardnum; 
+	private String boardTitle; 
+	private String boardDate;
+	private String productExplain;
+	private String productPrice;
+	private String productOffer;
+	private String productStatus;
+	private String boardCategory; 
+	private String boardReadCnt; 
+	private String boardPickCnt; 
+	private String boardStatus; 
+	private String location; 
+	private String avTime1;
+	private String avTime2;
+	private String filename;
+	
+	public String getFilename() {
+		return filename;
+	}
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
+	public String getUserid() {
+		return userid;
+	}
+	public void setUserid(String userid) {
+		this.userid = userid;
+	}
+	public int getBoardnum() {
+		return boardnum;
+	}
+	public void setBoardnum(int boardnum) {
+		this.boardnum = boardnum;
+	}
+	public String getBoardTitle() {
+		return boardTitle;
+	}
+	public void setBoardTitle(String boardTitle) {
+		this.boardTitle = boardTitle;
+	}
+	public String getBoardDate() {
+		return boardDate;
+	}
+	public void setBoardDate(String boardDate) {
+		this.boardDate = boardDate;
+	}
+	public String getProductExplain() {
+		return productExplain;
+	}
+	public void setProductExplain(String productExplain) {
+		this.productExplain = productExplain;
+	}
+	public String getProductPrice() {
+		return productPrice;
+	}
+	public void setProductPrice(String productPrice) {
+		this.productPrice = productPrice;
+	}
+	public String getProductOffer() {
+		return productOffer;
+	}
+	public void setProductOffer(String productOffer) {
+		this.productOffer = productOffer;
+	}
+	public String getProductStatus() {
+		return productStatus;
+	}
+	public void setProductStatus(String productStatus) {
+		this.productStatus = productStatus;
+	}
+	public String getBoardCategory() {
+		return boardCategory;
+	}
+	public void setBoardCategory(String boardCategory) {
+		this.boardCategory = boardCategory;
+	}
+	public String getBoardReadCnt() {
+		return boardReadCnt;
+	}
+	public void setBoardReadCnt(String boardReadCnt) {
+		this.boardReadCnt = boardReadCnt;
+	}
+	public String getBoardPickCnt() {
+		return boardPickCnt;
+	}
+	public void setBoardPickCnt(String boardPickCnt) {
+		this.boardPickCnt = boardPickCnt;
+	}
+	public String getBoardStatus() {
+		return boardStatus;
+	}
+	public void setBoardStatus(String boardStatus) {
+		this.boardStatus = boardStatus;
+	}
+	public String getLocation() {
+		return location;
+	}
+	public void setLocation(String location) {
+		this.location = location;
+	}
+	public String getAvTime1() {
+		return avTime1;
+	}
+	public void setAvTime1(String avTime1) {
+		this.avTime1 = avTime1;
+	}
+	public String getAvTime2() {
+		return avTime2;
+	}
+	public void setAvTime2(String avTime2) {
+		this.avTime2 = avTime2;
+	}
+	
+}
